@@ -1,0 +1,42 @@
+name "modem_can"
+version "0.0"
+
+import_types_from "base"
+
+if has_typekit?('canbus')
+import_types_from "canbus"
+task_context "Task" do
+
+    needs_configuration
+
+    input_port("canModem", "canbus/Message").
+        doc("Input port for Modem messages from the CAN dispatcher module")
+    
+    output_port("canOut", "canbus/Message").
+        doc("Outgoing messages for the modem")
+
+
+    port_driven
+end
+else
+    STDERR.puts "WARN: the Remote task will be disabled as the canbus orogen component is not present"
+end
+
+
+### For testing
+using_task_library "canbus"
+using_task_library "hbridge"
+using_task_library "controldev"
+
+deployment 'ocu_test_orocos' do
+    task("hbridge", "hbridge::Task").
+        #triggered. #try for avalon periodic to handle settings correct
+	periodic(0.001).
+        realtime.
+        priority(90)
+    task("can", "canbus::Task")
+    task("controldev", "controldev::Remote")
+    task("modem","Task").
+    	periodic(1)
+    add_default_logger
+end
