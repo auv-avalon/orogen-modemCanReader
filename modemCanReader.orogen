@@ -27,6 +27,7 @@ end
 using_task_library "canbus"
 using_task_library "hbridge"
 using_task_library "controldev"
+using_task_library "sysmon"
 
 deployment 'ocu_test_orocos' do
     task("hbridge", "hbridge::Task").
@@ -36,6 +37,7 @@ deployment 'ocu_test_orocos' do
         priority(90)
     task("can", "canbus::Task")
     task("controldev", "controldev::Remote")
+    task("sysmon","sysmon::Task")
     task("modem","Task").
     	periodic(1)
     add_default_logger
