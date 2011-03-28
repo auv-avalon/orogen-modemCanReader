@@ -7,6 +7,7 @@ if has_typekit?('canbus')
 import_types_from "canbus"
 task_context "Task" do
 
+    property 'scale','double',2.5
     needs_configuration
 
     input_port("canModem", "canbus/Message").
@@ -14,6 +15,9 @@ task_context "Task" do
     
     output_port("canOut", "canbus/Message").
         doc("Outgoing messages for the modem")
+
+    output_port("position_command", "base/AUVPositionCommand").
+        doc("Port for the AUV Position Command, reads from orientation input and tryes to calculate an delta position based on the joystick command")
 
 
     port_driven

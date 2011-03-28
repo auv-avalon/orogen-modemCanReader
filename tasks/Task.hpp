@@ -10,8 +10,9 @@ namespace modem_can {
     {
 	friend class TaskBase;
     protected:
-
-
+    	base::AUVPositionCommand auv;
+	uint8_t buffer[200];	
+	uint8_t pos;
 
     public:
         Task(std::string const& name = "modem_can::Task");
