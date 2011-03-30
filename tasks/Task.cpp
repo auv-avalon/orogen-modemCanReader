@@ -42,34 +42,38 @@ void Task::updateHook()
 	for(int i=0;i<msg.size;i++){
 		buffer[pos++] = msg.data[i];
 		if(msg.data[i] == '\n'){
-			if(pos==6){
+			if(pos==4){
 				double scale = _scale.get();
-				int8_t posX = msg.data[0];
-				int8_t posY = msg.data[1];
-				int8_t posZ = msg.data[2];
-				uint8_t heading = msg.data[3];
-				uint8_t checksum = msg.data[4];
+				int8_t posX = buffer[0];
+				int8_t posY = buffer[1];
+				int8_t posZ = buffer[2];
+				uint8_t heading = buffer[3];
+				uint8_t checksum = buffer[4];
 				if( ((uint8_t)((uint8_t)posX + (uint8_t)posY + (uint8_t)posZ + (uint8_t)heading)) == checksum){
 					auv.x = (posX/128)*scale;
 					auv.y = (posY/128)*scale;
 					auv.z = (posZ/128)*scale;
 					auv.heading = ((double)heading)/255.0*M_PI*2.0;
+					printf("Modem: Got new Position: %f,%f,%f heading: %f\n",posX,posY,posZ,heading);
 				}else{
-					printf("Checksum is invalid in modem Driver\n");
+					printf("Modem: Checksum is invalid in modem Driver\n");
 				}
 			}
+			printf("Modem: Pos is: %i\n",pos);
 			pos = 0;
+		}else{
+			printf("No newline detected char is: 0x%02x\n",msg.data[i]);
 		}
 		if(pos > 150) pos = 0;
 	}
     }
 
-    canbus::Message resp;
-    resp.time = base::Time::now();
-    resp.can_id = 0x1E1;
-    resp.size = sprintf((char*)resp.data,"-Hallo\n");
-    printf("Sending\n");
-    _canOut.write(resp);
+    //canbus::Message resp;
+    //resp.time = base::Time::now();
+    //resp.can_id = 0x1E1;
+    //resp.size = sprintf((char*)resp.data,"-Hallo\n");
+    //printf("Sending\n");
+    //_canOut.write(resp);
     
     _position_command.write(auv);
 
