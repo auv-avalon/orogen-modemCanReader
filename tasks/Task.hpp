@@ -73,6 +73,9 @@ namespace modem_can {
          * before calling start() again.
          */
         // void cleanupHook();
+        
+    private:
+        int count1s(int number);
     };
 }
 
