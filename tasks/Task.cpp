@@ -12,6 +12,7 @@ Task::Task(std::string const& name)
 	auv.z = -1.0;
 	auv.heading = 0;
 	pos=0;
+	fopen("modemMessages.txt","w");
 }
 
 
@@ -42,7 +43,10 @@ void Task::updateHook()
     
     while (_canModem.read(msg) == RTT::NewData)
     {
+    	    
+	    fprintf(modemData,"\n#%i\n",base::Time::now().toSeconds());
 	    for(int i=0;i<msg.size;i++){
+	    	    fprintf(modemData,"%02x ",msg.data[i]);
 		    buffer[pos++] = msg.data[i];
 		    if(msg.data[i] == '\n'){
 			    if(pos==4){ // position command
