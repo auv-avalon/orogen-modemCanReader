@@ -48,6 +48,11 @@ void Task::updateHook()
 	    for(int i=0;i<msg.size;i++){
 	    	    fprintf(modemData,"%02x ",msg.data[i]);
 		    buffer[pos++] = msg.data[i];
+		    char buff[5];
+		    buff[0] = msg.data[i];
+		    buff[1] = 0;
+		    _modem_out.write(std::string(buff));
+
 		    if(msg.data[i] == '\n'){
 			    if(pos==4){ // position command
 				    double scale = _scale.get();
@@ -91,12 +96,17 @@ void Task::updateHook()
 	    }
     }
 
-    //canbus::Message resp;
-    //resp.time = base::Time::now();
-    //resp.can_id = 0x1E1;
-    //resp.size = sprintf((char*)resp.data,"-Hallo\n");
-    //printf("Sending\n");
-    //_canOut.write(resp);
+    std::string string;
+    while(_modem_in.read(string) == RTT::NewData){
+    	char buff[5000];
+	canbus::Message resp;
+	resp.time = base::Time::now();
+	resp.can_id = 0x1E1;
+	resp.size = sprintf((char*)resp.data,"%s",string.c_str());
+	printf("Sending\n");
+	_canOut.write(resp);
+    }
+    
     
     _position_command.write(auv);
 

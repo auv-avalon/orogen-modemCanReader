@@ -10,6 +10,9 @@ task_context "Task" do
     property 'scale','double',2.5
     needs_configuration
 
+    input_port("modem_in", "string")
+    output_port("modem_out", "string")
+    
     input_port("canModem", "canbus/Message").
         doc("Input port for Modem messages from the CAN dispatcher module")
     
