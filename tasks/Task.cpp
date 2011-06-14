@@ -12,7 +12,7 @@ Task::Task(std::string const& name)
 	auv.z = -1.0;
 	auv.heading = 0;
 	pos=0;
-	fopen("modemMessages.txt","w");
+	modemData = fopen("modemMessages.txt","w");
 }
 
 
@@ -40,11 +40,21 @@ void Task::updateHook()
     canbus::Message msg;
     
     int biterrortest_size = 128;
+    fprintf(modemData,"\n#%i\n",base::Time::now().toSeconds());
     
     while (_canModem.read(msg) == RTT::NewData)
     {
     	    
-	    fprintf(modemData,"\n#%i\n",base::Time::now().toSeconds());
+	    printf("Modem hat daten\n");	    
+	    char buff[500];
+	    for(int i=0;i<msg.size;i++){
+	    	fprintf(modemData,"%02x ",msg.data[i]);
+	    	buff[i] = msg.data[i];
+	    }
+	    buff[msg.size] = 0;
+	    _modem_out.write(std::string(buff));
+
+	    /*
 	    for(int i=0;i<msg.size;i++){
 	    	    fprintf(modemData,"%02x ",msg.data[i]);
 		    buffer[pos++] = msg.data[i];
@@ -94,6 +104,7 @@ void Task::updateHook()
 		    }
 		    if(pos > 150) pos = 0;
 	    }
+	    */
     }
 
     std::string string;
