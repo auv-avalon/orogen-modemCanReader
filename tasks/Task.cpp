@@ -65,23 +65,7 @@ void Task::updateHook()
             _modem_out.write(std::string(buff));
 
             if (msg.data[i] == '\n') {
-                if (pos==4) { // position command
-                    double scale = _scale.get();
-                    int8_t posX = buffer[0];
-                    int8_t posY = buffer[1];
-                    int8_t posZ = buffer[2];
-                    uint8_t heading = buffer[3];
-                    uint8_t checksum = buffer[4];
-                    if ( ((uint8_t)((uint8_t)posX + (uint8_t)posY + (uint8_t)posZ + (uint8_t)heading)) == checksum) {
-                        auv.x = (posX/128)*scale;
-                        auv.y = (posY/128)*scale;
-                        auv.z = (posZ/128)*scale;
-                        auv.heading = ((double)heading)/255.0*M_PI*2.0;
-                        printf("Modem: Got new Position: %f,%f,%f heading: %f\n",posX,posY,posZ,heading);
-                    } else {
-                        printf("Modem: Checksum is invalid in modem Driver\n");
-                    }
-                } else if (pos==biterrortest_size-1) { // bit error test
+                if (pos==biterrortest_size-1) { // bit error test
                     uint8_t received[biterrortest_size];
                     for (int i=0; i<biterrortest_size; i++) {
                         received[i]=buffer[i];
@@ -103,7 +87,9 @@ void Task::updateHook()
             } else {
                 printf("No newline detected char is: 0x%02x\n",msg.data[i]);
             }
-            if (pos > 150) pos = 0;
+                if(pos > 450){
+                fprintf(stderr,"Cirtical catched overflow\n");
+                pos = 0;
         }
         */
 
