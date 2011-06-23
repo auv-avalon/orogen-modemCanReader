@@ -44,19 +44,20 @@ void Task::updateHook()
 
     while (_canModem.read(msg) == RTT::NewData)
     {
-        printf("Modem hat daten\n");
+        fprintf(modemData, "Modem hat daten\n");
         char buff[500];
         for (int i=0;i<msg.size;i++) 
         {
-            fprintf(modemData,"%02x ",msg.data[i]);
+            fprintf(modemData,"%i ",msg.data[i]);
             buff[i] = msg.data[i];
         }
         buff[msg.size] = 0;
         _modem_out.write(std::string(buff));
 
+        fflush(modemData);
+        
         /*
         for (int i=0;i<msg.size;i++) {
-            fprintf(modemData,"%02x ",msg.data[i]);
             buffer[pos++] = msg.data[i];
             char buff[5];
             buff[0] = msg.data[i];
