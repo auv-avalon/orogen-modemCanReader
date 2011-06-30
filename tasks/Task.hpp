@@ -72,7 +72,7 @@ public:
      * from Stopped to PreOperational, requiring the call to configureHook()
      * before calling start() again.
      */
-    // void cleanupHook();
+     void cleanupHook();
 
 private:
     int count1s(int number);

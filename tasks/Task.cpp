@@ -17,7 +17,7 @@ Task::Task(std::string const& name)
 
 
 
-/// The following lines are template definitions for the various state machine
+// The following lines are template definitions for the various state machine
 // hooks defined by Orocos::RTT. See Task.hpp for more detailed
 // documentation about them.
 
@@ -33,6 +33,7 @@ Task::Task(std::string const& name)
 //         return false;
 //     return true;
 // }
+
 void Task::updateHook()
 {
     TaskBase::updateHook();
@@ -95,19 +96,18 @@ void Task::updateHook()
 
     }
 
-    std::string string;
-    while (_modem_in.read(string) == RTT::NewData) {
-        char buff[5000];
-        canbus::Message resp;
-        resp.time = base::Time::now();
-        resp.can_id = 0x1E1;
-        resp.size = sprintf((char*)resp.data,"%s",string.c_str());
-        printf("Sending\n");
-        _canOut.write(resp);
-    }
-
-
-    _position_command.write(auv);
+//     std::string string;
+//     while (_modem_in.read(string) == RTT::NewData) {
+//         char buff[5000];
+//         canbus::Message resp;
+//         resp.time = base::Time::now();
+//         resp.can_id = 0x1E1;
+//         resp.size = sprintf((char*)resp.data,"%s",string.c_str());
+//         printf("Sending\n");
+//         _canOut.write(resp);
+//     }
+// 
+//     _position_command.write(auv);
 }
 
 int Task::count1s(int number)
@@ -132,8 +132,10 @@ int Task::count1s(int number)
 // {
 //     TaskBase::stopHook();
 // }
-// void Task::cleanupHook()
-// {
-//     TaskBase::cleanupHook();
-// }
+void Task::cleanupHook()
+{
+    TaskBase::cleanupHook();
+    
+    close(modemData);
+}
 
