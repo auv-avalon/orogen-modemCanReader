@@ -41,11 +41,11 @@ void Task::updateHook()
     canbus::Message msg;
 
     int biterrortest_size = 128;
-    fprintf(modemData,"#%f\n",base::Time::now().toSeconds());
+    //fprintf(modemData,"#%f\n",base::Time::now().toSeconds());
 
     while (_canModem.read(msg) == RTT::NewData)
     {
-        fprintf(modemData, "Modem hat daten\n");
+        //fprintf(modemData, "Modem hat daten\n");
         char buff[500];
         for (int i=0;i<msg.size;i++)
         {
