@@ -50,11 +50,12 @@ void Task::updateHook()
         for (int i=0;i<msg.size;i++)
         {
             fprintf(modemData,"%i\n",msg.data[i]);
+            printf("%i\n",msg.data[i]);
             buff[i] = msg.data[i];
         }
         buff[msg.size] = 0;
         _modem_out.write(std::string(buff));
-
+        
         fflush(modemData);
 
         /*
