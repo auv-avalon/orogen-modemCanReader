@@ -53,6 +53,7 @@ void Task::updateHook()
             printf("%i\n",msg.data[i]);
             buff[i] = msg.data[i];
         }
+        
         buff[msg.size] = 0;
         _modem_out.write(std::string(buff));
         

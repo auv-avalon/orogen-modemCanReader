@@ -36,16 +36,23 @@ using_task_library "hbridge"
 using_task_library "controldev"
 using_task_library "sysmon"
 
-deployment 'ocu_test_orocos' do
-    task("hbridge", "hbridge::Task").
-        #triggered. #try for avalon periodic to handle settings correct
-	periodic(0.001).
-        realtime.
-        priority(90)
-    task("can", "canbus::Task")
-    task("controldev", "controldev::Remote")
-    task("sysmon","sysmon::Task")
-    task("modem","Task").
-    	periodic(1)
+deployment 'modem_test' do
+
+###Old Deployment
+#deployment 'ocu_test_orocos' do
+#    task("hbridge", "hbridge::Task").
+#        #triggered. #try for avalon periodic to handle settings correct
+#	periodic(0.001).
+#        realtime.
+#        priority(90)
+#    task("can", "canbus::Task")
+#    task("controldev", "controldev::Remote")
+#    task("sysmon","sysmon::Task")
+#    task("modem","Task").
+#    	periodic(1)
+
+
+    do_not_install
+    task("modem_test","Task")
     add_default_logger
 end
