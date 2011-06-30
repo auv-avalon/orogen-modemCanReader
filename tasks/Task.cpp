@@ -41,7 +41,7 @@ void Task::updateHook()
     canbus::Message msg;
 
     int biterrortest_size = 128;
-    fprintf(modemData,"#%i\n",base::Time::now().toSeconds());
+    fprintf(modemData,"#%f\n",base::Time::now().toSeconds());
 
     while (_canModem.read(msg) == RTT::NewData)
     {
@@ -136,6 +136,6 @@ void Task::cleanupHook()
 {
     TaskBase::cleanupHook();
     
-    close(modemData);
+    fclose(modemData);
 }
 
