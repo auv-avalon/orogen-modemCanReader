@@ -77,7 +77,7 @@ public:
      * before calling start() again.
      */
      void cleanupHook();
-
+                    
 private:
     int count1s(int number);
     void sendData(uint8_t buffer, int buffersize);
