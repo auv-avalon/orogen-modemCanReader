@@ -2,6 +2,8 @@ name "modem_can"
 version "0.0"
 
 import_types_from "base"
+using_library "communication"
+
 
 if has_typekit?('canbus')
 import_types_from "canbus"
@@ -9,6 +11,9 @@ task_context "Task" do
 
     property 'scale','double',2.5
     needs_configuration
+
+    property("sendInterval","double",5.0).
+	doc("time how often an position message should be send")
 
     input_port("modem_in", "string")
     output_port("modem_out", "string")
@@ -18,9 +23,6 @@ task_context "Task" do
     
     output_port("canOut", "canbus/Message").
         doc("Outgoing messages for the modem")
-
-#    output_port("position_command", "base/AUVPositionCommand").
-#        doc("Port for the AUV Position Command, reads from orientation input and tryes to calculate an delta position based on the joystick command")
 
     output_port("motion_command", "base/AUVMotionCommand").
         doc("Motion command that is submittet by the nurc, and zero speed")
@@ -41,9 +43,9 @@ end
 
 ### For testing
 using_task_library "canbus"
-using_task_library "hbridge"
-using_task_library "controldev"
-using_task_library "sysmon"
+#using_task_library "hbridge"
+#using_task_library "controldev"
+#using_task_library "sysmon"
 
 deployment 'modem_test' do
 
@@ -62,6 +64,9 @@ deployment 'modem_test' do
 
 
     do_not_install
-    task("modem_test","Task")
+    task("can", "canbus::Task")
+    task("modem_test","Task").
+	periodic(0.2)
+
     add_default_logger
 end

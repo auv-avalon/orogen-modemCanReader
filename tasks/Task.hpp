@@ -5,6 +5,7 @@
 
 #include "modem_can/TaskBase.hpp"
 #include <boost/circular_buffer.hpp>
+#include <communication/Communication.hpp>
 
 namespace modem_can {
 class Task : public TaskBase
@@ -18,6 +19,8 @@ protected:
     //uint8_t pos;
     FILE *modemData;
     bool currentLightValue;
+    base::Time lastSendTime;
+
 public:
     Task(std::string const& name = "modem_can::Task");
 
@@ -79,8 +82,8 @@ public:
      void cleanupHook();
                     
 private:
-    int count1s(int number);
-    void sendData(uint8_t buffer, int buffersize);
+    //int count1s(int number);
+    //void sendData(uint8_t buffer, int buffersize);
 };
 }
 
