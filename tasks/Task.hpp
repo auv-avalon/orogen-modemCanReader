@@ -4,6 +4,7 @@
 #define MODEM_CAN_TASK_TASK_HPP
 
 #include "modem_can/TaskBase.hpp"
+#include <boost/circular_buffer.hpp>
 
 namespace modem_can {
 class Task : public TaskBase
@@ -11,9 +12,12 @@ class Task : public TaskBase
     friend class TaskBase;
 protected:
     base::AUVPositionCommand auv;
-    uint8_t buffer[200];
-    uint8_t pos;
+    boost::circular_buffer<uint8_t> buffer;
+
+    //uint8_t buffer[200];
+    //uint8_t pos;
     FILE *modemData;
+    bool currentLightValue;
 public:
     Task(std::string const& name = "modem_can::Task");
 

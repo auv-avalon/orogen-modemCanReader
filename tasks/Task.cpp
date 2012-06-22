@@ -5,14 +5,15 @@
 using namespace modem_can;
 
 Task::Task(std::string const& name)
-        : TaskBase(name)
+        : TaskBase(name), buffer(500)
 {
     auv.x = 0;
     auv.y = 0;
     auv.z = -1.0;
     auv.heading = 0;
-    pos=0;
-    modemData = fopen("modemMessages.txt","w");
+//    pos=0;
+    //modemData = fopen("modemMessages.txt","w");
+    currentLightValue = true;
 }
 
 
@@ -43,73 +44,82 @@ void Task::updateHook()
     int biterrortest_size = 128;
     //fprintf(modemData,"#%f\n",base::Time::now().toSeconds());
 
+{
+    bool v;
+    while(_light_value.read(v) == RTT::NewData){
+	currentLightValue = v;
+    }
+}
+
     while (_canModem.read(msg) == RTT::NewData)
     {
-        //fprintf(modemData, "Modem hat daten\n");
+
         char buff[500];
         for (int i=0;i<msg.size;i++)
         {
-            fprintf(modemData,"%i\n",msg.data[i]);
-            printf("%i\n",msg.data[i]);
             buff[i] = msg.data[i];
+	    buffer.push_back(msg.data[i]);
         }
         
         buff[msg.size] = 0;
         _modem_out.write(std::string(buff));
-        
-        fflush(modemData);
 
-        /*
-        for (int i=0;i<msg.size;i++) {
-            buffer[pos++] = msg.data[i];
-            char buff[5];
-            buff[0] = msg.data[i];
-            buff[1] = 0;
-            _modem_out.write(std::string(buff));
 
-            if (msg.data[i] == '\n') {
-                if (pos==biterrortest_size-1) { // bit error test
-                    uint8_t received[biterrortest_size];
-                    for (int i=0; i<biterrortest_size; i++) {
-                        received[i]=buffer[i];
-                    }
-                    // compare
-                    int errorbitscount = 0;
-                    for (int i=0; i<biterrortest_size; i++) {
-                        // not(a and b)
-                        int cmp = ~(((int)received[i]) & i);
-                        errorbitscount += count1s(cmp);
-                    }
-
-                    double errorrate = ((errorbitscount / biterrortest_size) * 8.0) * 100.0;
-                    std::cout << "Biterrortest: ERRORRATE IS " << errorrate << " PERCENT." << std::endl;
-                }
-
-                printf("Modem: Pos is: %i\n",pos);
-                pos = 0;
-            } else {
-                printf("No newline detected char is: 0x%02x\n",msg.data[i]);
-            }
-                if(pos > 450){
-                fprintf(stderr,"Cirtical catched overflow\n");
-                pos = 0;
-        }
-        */
-
+	std::vector<uint8_t> result; //=decode(buffer);
+	
+	if(result.size() >=4){
+		//Assuming nurc protokoll
+		bool identifier = result[0]&0x01; //fist bit identifier
+		if(identifier == 1){ //message from nurc
+			double heading = ((result[0] | result[1]<<8) >>1)&0x3FF;
+			heading = ((heading/0x3FF)*(2.0*M_PI)-M_PI);
+			double depth = (result[1] | result[2]<<8)>>2&0x0F;
+			depth= (depth/0x0F)*10.0;
+		    	base::AUVMotionCommand motion_command;
+		    	motion_command.heading = heading;
+		    	motion_command.z = -depth;
+		    	motion_command.x_speed = 0;
+		    	motion_command.y_speed = 0;
+		    	_motion_command.write(motion_command);
+		}else{
+			std::cerr << "Got invalid package" << std::endl;
+		}
+	}      	
     }
 
-//     std::string string;
-//     while (_modem_in.read(string) == RTT::NewData) {
-//         char buff[5000];
-//         canbus::Message resp;
-//         resp.time = base::Time::now();
-//         resp.can_id = 0x1E1;
-//         resp.size = sprintf((char*)resp.data,"%s",string.c_str());
-//         printf("Sending\n");
-//         _canOut.write(resp);
-//     }
-// 
+     std::string string;
+     while (_modem_in.read(string) == RTT::NewData) {
+         char buff[5000];
+         canbus::Message resp;
+         resp.time = base::Time::now();
+         resp.can_id = 0x1E1;
+         resp.size = sprintf((char*)resp.data,"%s",string.c_str());
+         printf("Sending\n");
+         _canOut.write(resp);
+     }
+ 
 //     _position_command.write(auv);
+
+     base::samples::RigidBodyState position_samples;
+     while(_position_samples.read(position_samples,false) == RTT::NewData){
+     	uint8_t message[4];
+	message[0] = 1; //first bit is one
+	uint16_t heading = ((position_samples.orientation.getHeading()+ M_PI)/(2.0*M_PI))*0x3FF;
+	uint8_t depth =  ((-position_samples.position[2])/10.0)*0x0F;
+	uint8_t posX = ((-position_samples.position[1])/100.0)*0x0F; 	
+	uint8_t posY = ((-position_samples.position[2])/100.0)*0x0F;
+	heading &= 0x3FF;
+	depth &=0x0F;
+	posX &=0x0F;
+	posY &=0x0F;
+	uint32_t p = (int32_t)resp.data;
+	p = heading & (heading<<1) & (depth<<11) & (posX<<16) & (posY<<24);
+        canbus::Message resp;
+        resp.time = base::Time::now();
+        resp.can_id = 0x1E1;
+        resp.size = 4;
+        _canOut.write(resp);
+     }
 }
 
 int Task::count1s(int number)
@@ -138,6 +148,6 @@ void Task::cleanupHook()
 {
     TaskBase::cleanupHook();
     
-    fclose(modemData);
+//    fclose(modemData);
 }
 
