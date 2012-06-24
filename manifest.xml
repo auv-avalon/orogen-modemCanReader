@@ -6,6 +6,7 @@
   <logo>http://</logo>
 
 <depend package="drivers/orogen/controldev" />
+<depend package="avalon/communication" />
 
   <export>
     <cpp cflags="" lflags="" />
