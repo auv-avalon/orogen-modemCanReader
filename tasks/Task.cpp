@@ -75,7 +75,7 @@ void Task::updateHook()
      base::samples::RigidBodyState position_samples;
      while(_position_samples.read(position_samples,false) != RTT::NoData && (base::Time::now() -lastSendTime).toSeconds() > _sendInterval.get()){
 	lastSendTime = base::Time::now();
-        canbus::Message resp = communication::Communication::createPacketFromAUV(position_samples);
+        canbus::Message resp = communication::Communication::createPacketFromAUV(position_samples,currentLightValue);
          _canOut.write(resp);
      }
 }
