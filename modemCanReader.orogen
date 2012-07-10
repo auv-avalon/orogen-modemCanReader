@@ -15,10 +15,13 @@ task_context "Task" do
     property("sendInterval","double",5.0).
 	doc("time how often an position message should be send")
 
-    input_port("modem_in", "string")
+    input_port("modem_in", "string").
+        needs_reliable_connection
+
     output_port("modem_out", "string")
     
     input_port("canModem", "canbus/Message").
+        needs_reliable_connection.
         doc("Input port for Modem messages from the CAN dispatcher module")
     
     output_port("canOut", "canbus/Message").
@@ -63,10 +66,11 @@ deployment 'modem_test' do
 #    	periodic(1)
 
 
-    do_not_install
-    task("can", "canbus::Task")
+    #do_not_install
+    task("can", "canbus::Task").
+        periodic(0.002)
     task("modem_test","Task").
-	periodic(0.2)
+	periodic(0.02)
 
     add_default_logger
 end

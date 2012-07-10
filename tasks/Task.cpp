@@ -43,7 +43,7 @@ void Task::updateHook()
     canbus::Message msg;
     while (_canModem.read(msg) == RTT::NewData)
     {
-
+        //printf("Got something with size: %i\n",msg.size);
         char buff[500];
         for (int i=0;i<msg.size;i++)
         {
