@@ -7,7 +7,6 @@ using namespace modem_can;
 Task::Task(std::string const& name)
         : TaskBase(name), buffer(500)
 {
-    currentLightValue = true;
 }
 
 
@@ -22,12 +21,14 @@ Task::Task(std::string const& name)
 //         return false;
 //     return true;
 // }
-// bool Task::startHook()
-// {
-//     if (! TaskBase::startHook())
-//         return false;
-//     return true;
-// }
+bool Task::startHook()
+{
+    if (! TaskBase::startHook())
+        return false;
+    currentLightValue = true;
+    gotValidPos=false;
+    return true;
+}
 
 void Task::updateHook()
 {
@@ -55,10 +56,15 @@ void Task::updateHook()
         _modem_out.write(std::string(buff));
 
 
-	base::AUVMotionCommand motion_command;
-        if(communication::Communication::getMotionCommandfromMessage(buffer,motion_command)){
+	base::AUVMotionCommand motion_command_new;
+        if(communication::Communication::getMotionCommandfromMessage(buffer,motion_command_new)){
+            motion_command = motion_command_new;
+            gotValidPos = true;
+        }
+        if(gotValidPos){
              _motion_command.write(motion_command);
         }
+
     }
 
      std::string string;
@@ -72,7 +78,6 @@ void Task::updateHook()
      }
  
 
-     base::samples::RigidBodyState position_samples;
      while(_position_samples.read(position_samples,false) != RTT::NoData && (base::Time::now() -lastSendTime).toSeconds() > _sendInterval.get()){
 	lastSendTime = base::Time::now();
         std::vector<canbus::Message> resp = communication::Communication::createPacketFromAUV(position_samples,currentLightValue);

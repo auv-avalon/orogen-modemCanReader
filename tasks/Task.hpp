@@ -14,6 +14,9 @@ class Task : public TaskBase
 protected:
     base::AUVPositionCommand auv;
     boost::circular_buffer<uint8_t> buffer;
+    base::samples::RigidBodyState position_samples;
+    bool gotValidPos;
+    base::AUVMotionCommand motion_command;
 
     //uint8_t buffer[200];
     //uint8_t pos;
@@ -44,7 +47,7 @@ public:
      * stay in Stopped. Otherwise, it goes into Running and updateHook()
      * will be called.
      */
-    // bool startHook();
+    bool startHook();
 
     /** This hook is called by Orocos when the component is in the Running
      * state, at each activity step. Here, the activity gives the "ticks"
