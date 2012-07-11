@@ -56,16 +56,26 @@ void Task::updateHook()
         _modem_out.write(std::string(buff));
 
 
-	base::AUVMotionCommand motion_command_new;
+		base::AUVMotionCommand motion_command_new;
         if(communication::Communication::getMotionCommandfromMessage(buffer,motion_command_new)){
             motion_command = motion_command_new;
             gotValidPos = true;
-        }
-        if(gotValidPos){
-             _motion_command.write(motion_command);
+			sendStartTime = base::Time::now();
         }
 
+
     }
+    
+	if(gotValidPos && (sendStartTime + base::Time::fromSeconds(_resend_time.get())) < base::Time::now() ){
+         _motion_command.write(motion_command);
+		state(CONTROLLING);
+    }else{
+		state(SENDED_COMMAND);
+	}	
+
+	if(!gotValidPos){
+		state(WAITING_FOR_INPUT);
+	}
 
      std::string string;
      while (_modem_in.read(string) == RTT::NewData) {
@@ -79,7 +89,7 @@ void Task::updateHook()
  
 
      while(_position_samples.read(position_samples,false) != RTT::NoData && (base::Time::now() -lastSendTime).toSeconds() > _sendInterval.get()){
-	lastSendTime = base::Time::now();
+		lastSendTime = base::Time::now();
         std::vector<canbus::Message> resp = communication::Communication::createPacketFromAUV(position_samples,currentLightValue);
         for(int i=0;i<resp.size();i++)
             _canOut.write(resp[i]);

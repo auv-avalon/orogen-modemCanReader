@@ -14,6 +14,9 @@ task_context "Task" do
 
     property("sendInterval","double",5.0).
 	doc("time how often an position message should be send")
+    
+	property("resend_time","double",120.0).
+	doc("time how long the last incomming command should be sended")
 
     input_port("modem_in", "string").
         needs_reliable_connection
@@ -36,7 +39,7 @@ task_context "Task" do
      input_port('position_samples', '/base/samples/RigidBodyState').
 	doc("Current Position of the vehicle it's send via the modem each time an sample here is recived, thhis include also the light_value")
 
-
+	runtime_states 'CONTROLLING', 'WAITING_FOR_INPUT', 'SENDED_COMMAND'
     port_driven
 end
 else

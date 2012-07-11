@@ -23,6 +23,7 @@ protected:
     FILE *modemData;
     bool currentLightValue;
     base::Time lastSendTime;
+    base::Time sendStartTime;
 
 public:
     Task(std::string const& name = "modem_can::Task");
